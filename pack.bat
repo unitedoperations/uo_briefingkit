@@ -1,0 +1,1 @@
+MakePbo -@=z\uo\addons\briefingkit -X=.bat ..\uo_briefingkit
