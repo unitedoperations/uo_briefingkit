@@ -27,14 +27,13 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 				// Creating briefing text
 				_textToDisplay = _textToDisplay + format ["", rank _unit];
 				_textToDisplay = _textToDisplay +
-						format ["<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%4_gs.paa' width='16' height='16'/> <font size='14' color='%5'>%1 %2 - %3kg</font>",
+					format ["<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%4_gs.paa' width='16' height='16'/> <font size='14' color='%5'>%1 %2 - %3kg</font><br/>",
 						name _unit,
-						roleDescription _unit,
+						((roleDescription _unit) splitString "@") select 0,
 						round ((loadAbs _unit) *0.1 * 0.45359237 * 10) / 10,
 						toLower rank _unit,
 						if (_unit == player) then {"#5555FF"} else {"#FFFFFF"}
 					];
-				_textToDisplay = _textToDisplay + "<br/>";
 
 				private _getApparelPicture = {
 					if (_this != "") then {
@@ -60,12 +59,12 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 				_hWeaponName = handgunWeapon _unit;
 				_weaponName = primaryWeapon _unit;
 
+				//display both weapon and it's attachments
 				private _getWeaponPicture = {
 					params ["_weaponName", "_weaponItems"];
 					private _str = "";
 					if (_weaponName != "") then {
 						_str = _str + ([_weaponName, [100, 50]] call _getPicture);
-						
 						{
 							if (_x != "") then {
 								_str = _str + ([_x, [50, 50]] call _getPicture);
@@ -75,6 +74,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 					_str
 				};
 
+				//display array of magazines
 				private _displayMags = {
 					_textToDisplay = _textToDisplay + "  ";
 					{
@@ -86,6 +86,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 					_textToDisplay = _textToDisplay + "<br/>";
 				};
 
+				//get magazines for a weapon and it's muzzles (grenade launchers etc.)
 				private _getMuzzleMags = {
 					private _result = getArray(configFile >> "CfgWeapons" >> _this >> "magazines");
 					{
@@ -109,7 +110,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 
 				_primaryMags call _displayMags;
 
-				// Secondary / handgun
+				// Secondary
 				private _secondaryMags = [];
 				if (_sWeaponName != "") then {
 					private _name = getText(configFile >> "CfgWeapons" >> _sWeaponName >> "displayName");
@@ -121,6 +122,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 					_secondaryMags call _displayMags;
 				};
 
+				// Handgun
 				private _handgunMags = [];
 				if (_hWeaponName != "") then {
 					private _name = getText(configFile >> "CfgWeapons" >> _hWeaponName >> "displayName");
@@ -148,7 +150,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 
 				_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Magazines and items: </font>(Click count for info.)<br/>", _x];
 
-				//mags/items
+				//display radios, then magazines, inventory items and assigned items
 				{
 					_x params ["_items", "_cfgType"];
 					while {count _items > 0} do {
@@ -196,7 +198,7 @@ UO_showOrbat = {
 				_text = _text + 
 					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='20' height='20'/> <font size='16' color='%6'>%1 %2</font>  %4  %5<br/>",
 						name _x,
-						roleDescription _x,
+						((roleDescription _x) splitString "@") select 0,
 						rank _x,
 						[primaryWeapon _x, [64,32]] call _getPicture,
 						[secondaryWeapon _x, [64,32]] call _getPicture,
