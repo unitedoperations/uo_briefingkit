@@ -27,9 +27,9 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 				// Creating briefing text
 				_textToDisplay = _textToDisplay + format ["", rank _unit];
 				_textToDisplay = _textToDisplay +
-					format ["<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%4_gs.paa' width='16' height='16'/> <font size='14' color='%5'>%1 %2 - %3kg</font><br/>",
+					format ["<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%4_gs.paa' width='16' height='16'/> <font size='14' color='%5'>%1 - %2</font> - %3kg<br/>",
 						name _unit,
-						((roleDescription _unit) splitString "@") select 0,
+						if (((roleDescription _unit) find "@") != -1) then {((roleDescription _unit) splitString "@") select 0} else {getText (configFile >> "CfgVehicles" >> typeOf _unit >> "displayName")},
 						round ((loadAbs _unit) *0.1 * 0.45359237 * 10) / 10,
 						toLower rank _unit,
 						if (_unit == player) then {"#5555FF"} else {"#FFFFFF"}
@@ -41,11 +41,11 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 						if (_name == "") then {
 							_name = getText(configFile >> "CfgVehicles" >> _this >> "displayName");
 						};
-						_pic = [_this, [50, 50]] call _getPicture;
+						_pic = [_this, [40, 40]] call _getPicture;
 						if (_pic == "") then {
-							_pic = [_this, [50, 50], "CfgVehicles"] call _getPicture;
+							_pic = [_this, [40, 40], "CfgVehicles"] call _getPicture;
 						};
-						_pic + format ["<execute expression='systemChat ""Item: %1""'>*</execute>  ", _name]
+						_pic + format ["<execute expression='systemChat ""%1""'>*</execute>  ", _name]
 					}
 					else {
 						""
@@ -64,10 +64,10 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 					params ["_weaponName", "_weaponItems"];
 					private _str = "";
 					if (_weaponName != "") then {
-						_str = _str + ([_weaponName, [100, 50]] call _getPicture);
+						_str = _str + ([_weaponName, [80, 40]] call _getPicture);
 						{
 							if (_x != "") then {
-								_str = _str + ([_x, [50, 50]] call _getPicture);
+								_str = _str + ([_x, [40, 40]] call _getPicture);
 							};
 						} forEach _weaponItems;
 					};
@@ -142,7 +142,7 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 				private _allItems = items _unit;
 				
 				{
-					if ((toLower _x) find "acre" != -1) then {
+					if ((toLower _x) find "acre_" != -1) then {
 						_radios pushBack _x;
 					};
 				} forEach _allItems;
@@ -195,15 +195,23 @@ UO_showOrbat = {
 		if (side _x == side player && !isNull leader _x && {isPlayer leader _x}) then {
 			_text = _text + format ["<font size='20' color='#FFFF00'>%1</font>", groupID _x] + "<br/>";
 			{
+				private _radios = "";
+				{
+					if ((toLower _x) find "acre_" != -1) then {
+						_radios = _radios + ([_x, [28,28]] call _getPicture);
+					};
+				} forEach items _x;
+
 				_text = _text + 
-					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='20' height='20'/> <font size='16' color='%6'>%1 %2</font>  %4  %5<br/>",
+					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2 |</font> %8 %4 %5<br/>",
 						name _x,
-						((roleDescription _x) splitString "@") select 0,
+						if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")},
 						rank _x,
-						[primaryWeapon _x, [64,32]] call _getPicture,
-						[secondaryWeapon _x, [64,32]] call _getPicture,
+						[primaryWeapon _x, [56,28]] call _getPicture,
+						[secondaryWeapon _x, [56,28]] call _getPicture,
 						if (_x == player) then {"#5555FF"} else {"#FFFFFF"},
-						if (_forEachIndex == 0) then {""} else {"     "}
+						if (_forEachIndex == 0) then {""} else {"     "},
+						_radios
 					];
 			} forEach [leader _x] + (units _x - [leader _x]);
 			_text = _text + "<br/>"
