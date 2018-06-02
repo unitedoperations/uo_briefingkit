@@ -24,12 +24,15 @@ private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 					format ["<img image='%1' width='%2' height='%3'/>", _image, _dimensions select 0, _dimensions select 1]
 				};
 
+				private _lobbyName = if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
+				if (_lobbyName == "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
+
 				// Creating briefing text
 				_textToDisplay = _textToDisplay + format ["", rank _unit];
 				_textToDisplay = _textToDisplay +
 					format ["<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%4_gs.paa' width='16' height='16'/> <font size='14' color='%5'>%1 - %2</font> - %3kg<br/>",
 						name _unit,
-						if (((roleDescription _unit) find "@") != -1) then {((roleDescription _unit) splitString "@") select 0} else {getText (configFile >> "CfgVehicles" >> typeOf _unit >> "displayName")},
+						_lobbyName,
 						round ((loadAbs _unit) *0.1 * 0.45359237 * 10) / 10,
 						toLower rank _unit,
 						if (_unit == player) then {"#5555FF"} else {"#FFFFFF"}
@@ -181,7 +184,7 @@ while {count _grpArray > 0} do {
 };
 
 UO_showOrbat = {
-	private _text = "<br/><execute expression='if (time < 1) then {call UO_showOrbat}'>Refresh</execute><br/><br/>";
+	private _text = "<br/><execute expression='if (time < 1) then {call UO_showOrbat}'>Refresh</execute> (click to show JIPs)<br/><br/>";
 
 	private _getPicture = {
 		params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
@@ -202,10 +205,13 @@ UO_showOrbat = {
 					};
 				} forEach items _x;
 
+				private _lobbyName = if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
+				if (_lobbyName == "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
+
 				_text = _text + 
 					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2 |</font> %8 %4 %5<br/>",
 						name _x,
-						if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")},
+						_lobbyName,
 						rank _x,
 						[primaryWeapon _x, [56,28]] call _getPicture,
 						[secondaryWeapon _x, [56,28]] call _getPicture,
@@ -214,7 +220,8 @@ UO_showOrbat = {
 						_radios
 					];
 			} forEach [leader _x] + (units _x - [leader _x]);
-			_text = _text + "<br/>"
+			_text = _text + "<br/>============================================================";
+			_text = _text + "<br/>============================================================";
 		};
 	} forEach allGroups;
 
