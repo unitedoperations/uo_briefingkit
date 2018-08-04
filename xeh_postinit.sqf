@@ -209,7 +209,7 @@ UO_showOrbat = {
 				if (_lobbyName == "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
 
 				_text = _text + 
-					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2 |</font> %8 %4 %5<br/>",
+					format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2</font> %8<br/>%4 %5<br/>",
 						name _x,
 						_lobbyName,
 						rank _x,
@@ -220,11 +220,12 @@ UO_showOrbat = {
 						_radios
 					];
 			} forEach [leader _x] + (units _x - [leader _x]);
-			_text = _text + "<br/>============================================================";
-			_text = _text + "<br/>============================================================";
 		};
 	} forEach allGroups;
 
+	_text = _text + "<br/>============================================================";
+	_text = _text + "<br/>============================================================";
+	
 	player createDiaryRecord ["GearIndex", ["ORBAT", _text]];
 };
 
