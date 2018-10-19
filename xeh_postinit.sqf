@@ -27,7 +27,7 @@ UO_loadoutIndex = {
 					private _getPicture = {
 						params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
 						private _image = getText(configFile >> _type >> _name >> "picture");
-						if (_image == "") exitWith {""};
+						if (_image == "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
 						if ((_image find ".paa") == -1) then {_image = _image + ".paa";};
 						format ["<img image='%1' width='%2' height='%3'/>", _image, _dimensions select 0, _dimensions select 1]
 					};
@@ -197,7 +197,7 @@ UO_loadoutIndex = {
 		private _getPicture = {
 			params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
 			private _image = getText(configFile >> _type >> _name >> "picture");
-			if (_image == "") exitWith {""};
+			if (_image == "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
 			if ((_image find ".paa") == -1) then {_image = _image + ".paa";};
 			format ["<img image='%1' width='%2' height='%3'/>", _image, _dimensions select 0, _dimensions select 1]
 		};
