@@ -1,12 +1,5 @@
 //by BlackHawk
 
-if (!isNil "UO_FW_Gear_Enabled" && {UO_FW_Gear_Enabled}) then {
-	[{!isNil "UO_FW_GearReady" && {UO_FW_GearReady}}, {call UO_loadoutIndex}] call CBA_fnc_waitUntilAndExecute;
-}
-else {
-	call UO_loadoutIndex;
-};
-
 UO_loadoutIndex = {
 	private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 
@@ -238,4 +231,10 @@ UO_loadoutIndex = {
 	};
 
 	call UO_showOrbat;
+};
+
+if (getMissionConfigValue["UO_FW_Gear_Enabled",false]) then {
+	[{missionNamespace getVariable ["UO_FW_GearReady",false]}, {call UO_loadoutIndex}] call CBA_fnc_waitUntilAndExecute;
+} else {
+	call UO_loadoutIndex;
 };
