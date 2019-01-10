@@ -233,8 +233,12 @@ UO_loadoutIndex = {
 	call UO_showOrbat;
 };
 
-if (getMissionConfigValue["UO_FW_Gear_Enabled",false]) then {
-	[{missionNamespace getVariable ["UO_FW_GearReady",false]}, {call UO_loadoutIndex}] call CBA_fnc_waitUntilAndExecute;
+if (getMissionConfigValue ["UO_FW_Enabled",false]) then {
+	if ((UO_FW_SERVER_GEARMODULE_ALLOWED) && {((UO_FW_Gear_Olsen_Enabled) || (UO_FW_Gear_ACEAR_System_Enabled))}) then {
+		[{((!isNull player) && {UO_FW_GearReady})},{[] call UO_loadoutIndex;}] call CBA_fnc_waitUntilAndExecute;
+	} else {
+		[] call UO_loadoutIndex;
+	};
 } else {
-	call UO_loadoutIndex;
+	[] call UO_loadoutIndex;
 };
