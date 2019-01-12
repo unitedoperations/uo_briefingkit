@@ -9,24 +9,26 @@ UO_loadoutIndex = {
 
 	{
 		private _grpText = "";
-		if (side _x == _playerSide) then {
+		if (side _x isEqualto _playerSide) then {
 			private _group = _x;
 			private _show = false;
 			private _textToDisplay = "";
 			{
 				private _unit = _x;
-				if ((alive _unit) && ((isMultiplayer) && (_unit in playableUnits) || ((!isMultiplayer) && (_unit in switchableUnits))) && (side _unit == _playerSide)) then {
+				if ((alive _unit) && ((isMultiplayer) && (_unit in playableUnits) || {((!isMultiplayer) && (_unit in switchableUnits))) && (side _unit isEqualto _playerSide)}) then {
 
 					private _getPicture = {
 						params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
+						if (_name isEqualto "") exitwith {""};
+						if !(hasText(configFile >> _type >> _name >> "picture")) exitwith {""};
 						private _image = getText(configFile >> _type >> _name >> "picture");
-						if (_image == "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
-						if ((_image find ".paa") == -1) then {_image = _image + ".paa";};
+						if (_image isEqualto "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
+						if ((_image find ".paa") isEqualto -1) then {_image = _image + ".paa";};
 						format ["<img image='%1' width='%2' height='%3'/>", _image, _dimensions select 0, _dimensions select 1]
 					};
 
-					private _lobbyName = if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
-					if (_lobbyName == "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
+					private _lobbyName = if !(((roleDescription _x) find "@") isEqualto -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
+					if (_lobbyName isEqualto "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
 
 					// Creating briefing text
 					_textToDisplay = _textToDisplay + format ["", rank _unit];
@@ -36,17 +38,17 @@ UO_loadoutIndex = {
 							_lobbyName,
 							round ((loadAbs _unit) *0.1 * 0.45359237 * 10) / 10,
 							toLower rank _unit,
-							if (_unit == player) then {"#5555FF"} else {"#FFFFFF"}
+							if (_unit isEqualto player) then {"#5555FF"} else {"#FFFFFF"}
 						];
 
 					private _getApparelPicture = {
-						if (_this != "") then {
+						if !(_this isEqualto "") then {
 							private _name  = getText(configFile >> "CfgWeapons" >> _this >> "displayName");
-							if (_name == "") then {
+							if (_name isEqualto "") then {
 								_name = getText(configFile >> "CfgVehicles" >> _this >> "displayName");
 							};
 							_pic = [_this, [40, 40]] call _getPicture;
-							if (_pic == "") then {
+							if (_pic isEqualto "") then {
 								_pic = [_this, [40, 40], "CfgVehicles"] call _getPicture;
 							};
 							_pic + format ["<execute expression='systemChat ""%1""'>*</execute>  ", _name]
@@ -67,7 +69,7 @@ UO_loadoutIndex = {
 					private _getWeaponPicture = {
 						params ["_weaponName", "_weaponItems"];
 						private _str = "";
-						if (_weaponName != "") then {
+						if !(_weaponName isEqualto "") then {
 							_str = _str + ([_weaponName, [80, 40]] call _getPicture);
 							{
 								if (_x != "") then {
@@ -94,7 +96,7 @@ UO_loadoutIndex = {
 					private _getMuzzleMags = {
 						private _result = getArray(configFile >> "CfgWeapons" >> _this >> "magazines");
 						{
-							if (_x != "this" && _x != "SAFE") then {
+							if (!(_x isEqualto "this") && {!(_x isEqualto "SAFE")}) then {
 								{_result pushBackUnique _x} forEach getArray (configFile >> "CfgWeapons" >> _this >> _x >> "magazines");
 							};
 						} forEach getArray (configFile >> "CfgWeapons" >> _this >> "muzzles");
@@ -103,7 +105,7 @@ UO_loadoutIndex = {
 					};
 
 					// Primary weapon
-					if (_weaponName != "") then {
+					if !(_weaponName isEqualto "") then {
 						private _name = getText(configFile >> "CfgWeapons" >> _weaponName >> "displayName");
 						_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Primary: </font>%1<br/>", _name] + ([_weaponName, primaryWeaponItems _unit] call _getWeaponPicture);
 					};
@@ -128,7 +130,7 @@ UO_loadoutIndex = {
 
 					// Handgun
 					private _handgunMags = [];
-					if (_hWeaponName != "") then {
+					if !(_hWeaponName isEqualto "") then {
 						private _name = getText(configFile >> "CfgWeapons" >> _hWeaponName >> "displayName");
 						_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Sidearm: </font>%1<br/>", _name];
 						_textToDisplay = _textToDisplay + ([_hWeaponName, handgunItems _unit] call _getWeaponPicture);
@@ -159,7 +161,7 @@ UO_loadoutIndex = {
 						_x params ["_items", "_cfgType"];
 						while {count _items > 0} do {
 							private _name = _items select 0;
-							private _itemCount = {_x == _name} count _items;
+							private _itemCount = {_x isEqualto _name} count _items;
 							private _displayName = getText(configFile >> _cfgType >> _name >> "displayName");
 							_textToDisplay = _textToDisplay + ([_name, [32,32], _cfgType] call _getPicture) + format ["<execute expression='systemChat ""%2""'>x%1</execute>  ", _itemCount, _displayName];
 							_items = _items - [_name];
@@ -175,7 +177,7 @@ UO_loadoutIndex = {
 			if _show then {
 				_grpText = _grpText + _textToDisplay;
 			};
-			if (_grpText != "") then {_grpArray set [count _grpArray,["GearIndex", [groupID _group, _grpText]]]};
+			if !(_grpText isEqualto "") then {_grpArray set [count _grpArray,["GearIndex", [groupID _group, _grpText]]]};
 		};
 	} foreach allGroups;
 
@@ -189,14 +191,16 @@ UO_loadoutIndex = {
 
 		private _getPicture = {
 			params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
+			if (_name isEqualto "") exitwith {""};
+			if !(hasText(configFile >> _type >> _name >> "picture")) exitwith {""};
 			private _image = getText(configFile >> _type >> _name >> "picture");
-			if (_image == "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
-			if ((_image find ".paa") == -1) then {_image = _image + ".paa";};
+			if (_image isEqualto "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
+			if ((_image find ".paa") isEqualto -1) then {_image = _image + ".paa";};
 			format ["<img image='%1' width='%2' height='%3'/>", _image, _dimensions select 0, _dimensions select 1]
 		};
 
 		{
-			if (side _x == side player && !isNull leader _x && {isPlayer leader _x}) then {
+			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {isPlayer leader _x}) then {
 				_text = _text + format ["<font size='20' color='#FFFF00'>%1</font>", groupID _x] + "<br/>";
 				{
 					private _radios = "";
@@ -206,8 +210,8 @@ UO_loadoutIndex = {
 						};
 					} forEach items _x;
 
-					private _lobbyName = if (((roleDescription _x) find "@") != -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
-					if (_lobbyName == "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
+					private _lobbyName = if !(((roleDescription _x) find "@") isEqualto -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
+					if (_lobbyName isEqualto "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
 
 					_text = _text + 
 						format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2</font> %8<br/>%4 %5<br/>",
@@ -216,8 +220,8 @@ UO_loadoutIndex = {
 							rank _x,
 							[primaryWeapon _x, [56,28]] call _getPicture,
 							[secondaryWeapon _x, [56,28]] call _getPicture,
-							if (_x == player) then {"#5555FF"} else {"#FFFFFF"},
-							if (_forEachIndex == 0) then {""} else {"     "},
+							if (_x isEqualto player) then {"#5555FF"} else {"#FFFFFF"},
+							if (_forEachIndex isEqualto 0) then {""} else {"     "},
 							_radios
 						];
 				} forEach [leader _x] + (units _x - [leader _x]);
