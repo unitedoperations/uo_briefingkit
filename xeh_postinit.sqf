@@ -14,7 +14,7 @@ UO_loadoutIndex = {
 			private _textToDisplay = "";
 			{
 				private _unit = _x;
-				if ((alive _unit) && {((isMultiplayer) && (_unit in playableUnits)) || ((!isMultiplayer) && (_unit in switchableUnits) && ((side _unit) isEqualto _playerSide))}) then {
+				if ((alive _unit) && {((isMultiplayer) && (_unit in playableUnits)) || ((!isMultiplayer) && (_unit in switchableUnits))}) then {
 
 					private _getPicture = {
 						params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
@@ -192,7 +192,7 @@ UO_loadoutIndex = {
 		};
 
 		{
-			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {isPlayer leader _x}) then {
+			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {(isPlayer leader _x) || !(isMultiplayer)}) then {
 				_text = _text + format ["<font size='20' color='#FFFF00'>%1</font>", groupID _x] + "<br/>";
 				{
 					private _radios = "";
