@@ -4,7 +4,6 @@ UO_loadoutIndex = {
 	private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 
 		private _playerSide = side player;
-		private _grpText = "";
 		private _grpArray = [];
 
 	{
@@ -15,7 +14,7 @@ UO_loadoutIndex = {
 			private _textToDisplay = "";
 			{
 				private _unit = _x;
-				if ((alive _unit) && {((isMultiplayer) && (_unit in playableUnits))} || {((!isMultiplayer) && (_unit in switchableUnits) && (side _unit isEqualto _playerSide))}) then {
+				if ((alive _unit) && {((isMultiplayer) && (_unit in playableUnits)) || ((!isMultiplayer) && (_unit in switchableUnits) && ((side _unit) isEqualto _playerSide))}) then {
 
 					private _getPicture = {
 						params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
@@ -47,7 +46,7 @@ UO_loadoutIndex = {
 							if (_name isEqualto "") then {
 								_name = getText(configFile >> "CfgVehicles" >> _this >> "displayName");
 							};
-							_pic = [_this, [40, 40]] call _getPicture;
+							private _pic = [_this, [40, 40]] call _getPicture;
 							if (_pic isEqualto "") then {
 								_pic = [_this, [40, 40], "CfgVehicles"] call _getPicture;
 							};
@@ -59,10 +58,6 @@ UO_loadoutIndex = {
 					{_textToDisplay = _textToDisplay + (_x call _getApparelPicture)} forEach [uniform _unit, vest _unit, backpack _unit, headgear _unit];
 
 					_textToDisplay = _textToDisplay + "<br/>";
-
-					_sWeaponName = secondaryWeapon _unit;
-					_hWeaponName = handgunWeapon _unit;
-					_weaponName = primaryWeapon _unit;
 
 					//display both weapon and it's attachments
 					private _getWeaponPicture = {
@@ -102,6 +97,10 @@ UO_loadoutIndex = {
 						_result = _result apply {toLower _x};
 						_result
 					};
+
+					private _sWeaponName = secondaryWeapon _unit;
+					private _hWeaponName = handgunWeapon _unit;
+					private _weaponName = primaryWeapon _unit;
 
 					// Primary weapon
 					if !(_weaponName isEqualto "") then {
