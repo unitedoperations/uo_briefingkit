@@ -4,7 +4,6 @@ UO_loadoutIndex = {
 	private _newIndex = player createDiarySubject ["GearIndex","Loadouts"];
 
 		private _playerSide = side player;
-		private _grpText = "";
 		private _grpArray = [];
 
 	{
@@ -15,12 +14,12 @@ UO_loadoutIndex = {
 			private _textToDisplay = "";
 			{
 				private _unit = _x;
-				if ((alive _unit) && ((isMultiplayer) && (_unit in playableUnits) || {((!isMultiplayer) && (_unit in switchableUnits))) && (side _unit isEqualto _playerSide)}) then {
+				if ((alive _unit) && {((isMultiplayer) && (_unit in playableUnits)) || ((!isMultiplayer) && (_unit in switchableUnits))}) then {
 
 					private _getPicture = {
 						params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
 						if (_name isEqualto "") exitwith {""};
-						if !(hasText(configFile >> _type >> _name >> "picture")) exitwith {""};
+						if !(isText(configFile >> _type >> _name >> "picture")) exitwith {""};
 						private _image = getText(configFile >> _type >> _name >> "picture");
 						if (_image isEqualto "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
 						if ((_image find ".paa") isEqualto -1) then {_image = _image + ".paa";};
@@ -47,23 +46,18 @@ UO_loadoutIndex = {
 							if (_name isEqualto "") then {
 								_name = getText(configFile >> "CfgVehicles" >> _this >> "displayName");
 							};
-							_pic = [_this, [40, 40]] call _getPicture;
+							private _pic = [_this, [40, 40]] call _getPicture;
 							if (_pic isEqualto "") then {
 								_pic = [_this, [40, 40], "CfgVehicles"] call _getPicture;
 							};
 							_pic + format ["<execute expression='systemChat ""%1""'>*</execute>  ", _name]
-						}
-						else {
+						} else {
 							""
 						};
 					};
 					{_textToDisplay = _textToDisplay + (_x call _getApparelPicture)} forEach [uniform _unit, vest _unit, backpack _unit, headgear _unit];
 
 					_textToDisplay = _textToDisplay + "<br/>";
-
-					_sWeaponName = secondaryWeapon _unit;
-					_hWeaponName = handgunWeapon _unit;
-					_weaponName = primaryWeapon _unit;
 
 					//display both weapon and it's attachments
 					private _getWeaponPicture = {
@@ -72,7 +66,7 @@ UO_loadoutIndex = {
 						if !(_weaponName isEqualto "") then {
 							_str = _str + ([_weaponName, [80, 40]] call _getPicture);
 							{
-								if (_x != "") then {
+								if !(_x isEqualto "") then {
 									_str = _str + ([_x, [40, 40]] call _getPicture);
 								};
 							} forEach _weaponItems;
@@ -85,7 +79,7 @@ UO_loadoutIndex = {
 						_textToDisplay = _textToDisplay + "  ";
 						{
 							private _name = _x;
-							private _itemCount = {_x == _name} count _allMags;
+							private _itemCount = {_x isEqualto _name} count _allMags;
 							private _displayName = getText(configFile >> "CfgMagazines" >> _name >> "displayName");
 							_textToDisplay = _textToDisplay + ([_name, [32,32], "CfgMagazines"] call _getPicture) + format ["<execute expression='systemChat ""%2""'>x%1</execute> ", _itemCount, _displayName];
 						} forEach _this;
@@ -104,12 +98,16 @@ UO_loadoutIndex = {
 						_result
 					};
 
+					private _sWeaponName = secondaryWeapon _unit;
+					private _hWeaponName = handgunWeapon _unit;
+					private _weaponName = primaryWeapon _unit;
+
 					// Primary weapon
 					if !(_weaponName isEqualto "") then {
 						private _name = getText(configFile >> "CfgWeapons" >> _weaponName >> "displayName");
 						_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Primary: </font>%1<br/>", _name] + ([_weaponName, primaryWeaponItems _unit] call _getWeaponPicture);
 					};
-					
+
 					private _allMags = magazines _unit;
 					_allMags = _allMags apply {toLower _x};
 					private _primaryMags = _allMags arrayIntersect (_weaponName call _getMuzzleMags);
@@ -118,13 +116,11 @@ UO_loadoutIndex = {
 
 					// Secondary
 					private _secondaryMags = [];
-					if (_sWeaponName != "") then {
+					if !(_sWeaponName isEqualto "") then {
 						private _name = getText(configFile >> "CfgWeapons" >> _sWeaponName >> "displayName");
 						_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Launcher: </font>%1<br/>", _name];
 						_textToDisplay = _textToDisplay + ([_sWeaponName, secondaryWeaponItems _unit] call _getWeaponPicture);
-
 						_secondaryMags = _allMags arrayIntersect (_sWeaponName call _getMuzzleMags);
-						
 						_secondaryMags call _displayMags;
 					};
 
@@ -134,9 +130,7 @@ UO_loadoutIndex = {
 						private _name = getText(configFile >> "CfgWeapons" >> _hWeaponName >> "displayName");
 						_textToDisplay = _textToDisplay + format ["<font color='#FFFF00'>Sidearm: </font>%1<br/>", _name];
 						_textToDisplay = _textToDisplay + ([_hWeaponName, handgunItems _unit] call _getWeaponPicture);
-
 						_handgunMags = _allMags arrayIntersect (_hWeaponName call _getMuzzleMags);
-
 						_handgunMags call _displayMags;
 					};
 
@@ -146,9 +140,9 @@ UO_loadoutIndex = {
 
 					private _radios = [];
 					private _allItems = items _unit;
-					
+
 					{
-						if ((toLower _x) find "acre_" != -1) then {
+						if !((toLower _x) find "acre_" isEqualto -1) then {
 							_radios pushBack _x;
 						};
 					} forEach _allItems;
@@ -167,13 +161,11 @@ UO_loadoutIndex = {
 							_items = _items - [_name];
 						};
 					} forEach [[_radios, "CfgWeapons"], [_allMags, "CfgMagazines"], [_allItems, "CfgWeapons"], [assignedItems _unit, "CfgWeapons"]];
-
 					_textToDisplay = _textToDisplay + "<br/>============================================================<br/>";
-
 					_show = true;
 				};
 			} foreach units _group;
-			
+
 			if _show then {
 				_grpText = _grpText + _textToDisplay;
 			};
@@ -181,18 +173,18 @@ UO_loadoutIndex = {
 		};
 	} foreach allGroups;
 
-	while {count _grpArray > 0} do {
-		_wrekt = _grpArray call BIS_fnc_arrayPop;
-		player createDiaryRecord _wrekt;
-	};
+	reverse _grpArray;
+	{
+		player createDiaryRecord _x;
+	} foreach _grpArray;
 
 	UO_showOrbat = {
-		private _text = "<br/><execute expression='if (time < 1) then {call UO_showOrbat}'>Refresh</execute> (click to show JIPs)<br/><br/>";
+		private _text = "<br/><execute expression='if (CBA_missionTime > 1) then {call UO_showOrbat}'>Refresh</execute> (click to show JIPs)<br/><br/>";
 
 		private _getPicture = {
 			params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
 			if (_name isEqualto "") exitwith {""};
-			if !(hasText(configFile >> _type >> _name >> "picture")) exitwith {""};
+			if !(isText(configFile >> _type >> _name >> "picture")) exitwith {""};
 			private _image = getText(configFile >> _type >> _name >> "picture");
 			if (_image isEqualto "") then {_image = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";};
 			if ((_image find ".paa") isEqualto -1) then {_image = _image + ".paa";};
@@ -200,12 +192,12 @@ UO_loadoutIndex = {
 		};
 
 		{
-			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {isPlayer leader _x}) then {
+			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {(isPlayer leader _x) || !(isMultiplayer)}) then {
 				_text = _text + format ["<font size='20' color='#FFFF00'>%1</font>", groupID _x] + "<br/>";
 				{
 					private _radios = "";
 					{
-						if ((toLower _x) find "acre_" != -1) then {
+						if !((toLower _x) find "acre_" isEqualto -1) then {
 							_radios = _radios + ([_x, [28,28]] call _getPicture);
 						};
 					} forEach items _x;
@@ -213,16 +205,17 @@ UO_loadoutIndex = {
 					private _lobbyName = if !(((roleDescription _x) find "@") isEqualto -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
 					if (_lobbyName isEqualto "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
 
-					_text = _text + 
-						format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2</font> %8<br/>%4 %5<br/>",
+					_text = _text +
+						format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2</font> %8<br/>%4 %5 %9<br/>",
 							name _x,
 							_lobbyName,
 							rank _x,
-							[primaryWeapon _x, [56,28]] call _getPicture,
-							[secondaryWeapon _x, [56,28]] call _getPicture,
+							if !(primaryWeapon _x isEqualto "") then {[primaryWeapon _x, [56,28]] call _getPicture} else {if !(handgunWeapon _x isEqualto "") then {[handgunWeapon _x, [56,28]] call _getPicture} else {""}},
+							if !(secondaryWeapon _x isEqualto "") then {[secondaryWeapon _x, [56,28]] call _getPicture} else {""},
 							if (_x isEqualto player) then {"#5555FF"} else {"#FFFFFF"},
 							if (_forEachIndex isEqualto 0) then {""} else {"     "},
-							_radios
+							_radios,
+							if !(backpack _x isEqualto "") then {[backpack _x, [28,28], "CfgVehicles"] call _getPicture} else {""}
 						];
 				} forEach [leader _x] + (units _x - [leader _x]);
 			};
@@ -230,7 +223,7 @@ UO_loadoutIndex = {
 
 		_text = _text + "<br/>============================================================";
 		_text = _text + "<br/>============================================================";
-		
+
 		player createDiaryRecord ["GearIndex", ["ORBAT", _text]];
 	};
 
