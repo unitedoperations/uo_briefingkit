@@ -179,7 +179,7 @@ UO_loadoutIndex = {
 	} foreach _grpArray;
 
 	UO_showOrbat = {
-		private _text = "<br/><execute expression='if (CBA_missionTime > 1) then {call UO_showOrbat}'>Refresh</execute> (click to show JIPs)<br/><br/>";
+		private _text = "<br/><execute expression='[] call UO_showOrbat'>Refresh</execute> (click to show JIPs)<br/><br/>";
 
 		private _getPicture = {
 			params ["_name", "_dimensions", ["_type", "CfgWeapons"]];
@@ -195,27 +195,39 @@ UO_loadoutIndex = {
 			if (((side _x) isEqualto (side player)) && {!isNull leader _x} && {(isPlayer leader _x) || !(isMultiplayer)}) then {
 				_text = _text + format ["<font size='20' color='#FFFF00'>%1</font>", groupID _x] + "<br/>";
 				{
+					private _unit = _x;
 					private _radios = "";
 					{
 						if !((toLower _x) find "acre_" isEqualto -1) then {
 							_radios = _radios + ([_x, [28,28]] call _getPicture);
 						};
-					} forEach items _x;
+					} forEach items _unit;
 
-					private _lobbyName = if !(((roleDescription _x) find "@") isEqualto -1) then {((roleDescription _x) splitString "@") select 0} else {roleDescription _x};
-					if (_lobbyName isEqualto "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName")};
+					private _optics = "";
+					private _opticsClasses = ["UK3CB_BAF_Soflam_Laserdesignator","Laserdesignator","Laserdesignator_01_khk_F","Laserdesignator_02","Laserdesignator_02_ghex_F","Laserdesignator_03","rhsusf_bino_lerca_1200_black","rhsusf_bino_lerca_1200_tan","ACE_VectorDay","ACE_Vector","rhs_pdu4","rhsusf_bino_lrf_Vector21","Rangefinder","ACE_Yardage450","ACE_MX2A","Binocular","rhsusf_bino_m24_ARD","rhsusf_bino_m24","rhsusf_bino_leopold_mk4"];
+					{
+						private _class = _x;
+						if (_class in (items _unit + assignedItems _unit)) exitwith {
+							_optics = ([_class, [28,28]] call _getPicture);
+						};
+					} foreach _opticsClasses;
+
+					private _lobbyName = if !(((roleDescription _unit) find "@") isEqualto -1) then {((roleDescription _unit) splitString "@") select 0} else {roleDescription _unit};
+					if (_lobbyName isEqualto "") then {_lobbyName = getText (configFile >> "CfgVehicles" >> typeOf _unit >> "displayName")};
 
 					_text = _text +
-						format ["%7<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%3_gs.paa' width='15' height='15'/> <font size='16' color='%6'>%1 | %2</font> %8<br/>%4 %5 %9<br/>",
-							name _x,
-							_lobbyName,
-							rank _x,
-							if !(primaryWeapon _x isEqualto "") then {[primaryWeapon _x, [56,28]] call _getPicture} else {if !(handgunWeapon _x isEqualto "") then {[handgunWeapon _x, [56,28]] call _getPicture} else {""}},
-							if !(secondaryWeapon _x isEqualto "") then {[secondaryWeapon _x, [56,28]] call _getPicture} else {""},
-							if (_x isEqualto player) then {"#5555FF"} else {"#FFFFFF"},
+						format ["%1<img image='\A3\Ui_f\data\GUI\Cfg\Ranks\%2_gs.paa' width='15' height='15'/> <font size='16' color='%3'>%4 | %5</font> %6 | %7kg<br/>%8 %9 %10 %11<br/>",
 							if (_forEachIndex isEqualto 0) then {""} else {"     "},
+							rank _unit,
+							if (_unit isEqualto player) then {"#5555FF"} else {"#FFFFFF"},
+							name _unit,
+							_lobbyName,
 							_radios,
-							if !(backpack _x isEqualto "") then {[backpack _x, [28,28], "CfgVehicles"] call _getPicture} else {""}
+							((round ((loadAbs player) * 0.45359237)) / 10),
+							if !(primaryWeapon _unit isEqualto "") then {[primaryWeapon _unit, [56,28]] call _getPicture} else {if !(handgunWeapon _unit isEqualto "") then {[handgunWeapon _unit, [56,28]] call _getPicture} else {""}},
+							if !(secondaryWeapon _unit isEqualto "") then {[secondaryWeapon _unit, [56,28]] call _getPicture} else {""},
+							if !(backpack _unit isEqualto "") then {[backpack _unit, [28,28], "CfgVehicles"] call _getPicture} else {""},
+							_optics
 						];
 				} forEach [leader _x] + (units _x - [leader _x]);
 			};
