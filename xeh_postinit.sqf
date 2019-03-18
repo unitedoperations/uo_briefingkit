@@ -242,6 +242,6 @@ UO_loadoutIndex = {
     call UO_showOrbat;
 };
 
-if !(getMissionConfigValue ["UO_FW_Enabled",false]) then {
+if !(getMissionConfigValue ["UO_FW_Core_Enabled",false]) then {
     [] call UO_loadoutIndex;
 };
